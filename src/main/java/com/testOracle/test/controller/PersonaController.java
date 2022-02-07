@@ -6,6 +6,11 @@ import com.testOracle.test.services.PersonaServiceImplement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.sql.DataSource;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -14,18 +19,37 @@ public class PersonaController {
     @Autowired
     PersonaServiceImplement imp;
 
+    @Autowired
+    private DataSource dataSource;
+
+    @GetMapping("/test-tables")
+    public List<String> showTables() throws Exception {
+        List<String> list = new ArrayList<String>();
+
+
+        DatabaseMetaData metaData = dataSource.getConnection().getMetaData();
+        ResultSet tables = metaData.getTables(null, null, null, new String[]{"TABLE"});
+
+        while(tables.next()){
+            list.add(tables.getString("TABLE_NAME"));
+        }
+
+
+        return list;
+
+    }
 
     @GetMapping("/list/clients")
     public List<Persona> listarClientes(){
         return imp.listarClientes();
     }
 
-    /*
+
     @PostMapping("/save/client")
     public Persona guardarCliente(@RequestBody Persona persona) {
         return imp.guardarCliente(persona);
     }
-
+/*
     @GetMapping("/client/{id}")
     public Persona clienteId(@PathVariable(name = "id") Long id) {
         Persona personaId = new Persona();
